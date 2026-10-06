@@ -18,9 +18,10 @@ h2{font-size:14px;margin:0 0 12px;color:#fff;background:var(--r);display:inline-
 label.f{display:flex;flex-direction:column;gap:4px;font-size:14px}
 label.f i{color:var(--m);font-size:12px;font-style:normal;direction:ltr;display:inline-block}
 em{color:var(--r);font-style:normal}
-input{padding:9px;border:1px solid #c9c9ce;border-radius:8px;font:inherit;width:100%;background:#fff}
-input:focus{outline:2px solid var(--r);border-color:transparent}
+input,select{padding:9px;border:1px solid #c9c9ce;border-radius:8px;font:inherit;width:100%;background:#fff}
+input:focus,select:focus{outline:2px solid var(--r);border-color:transparent}
 .err{color:var(--r);font-size:12px}
+.sub{font-size:13px;margin:14px 0 6px;color:var(--m)}
 .tw{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:640px}
 th{font-size:12px;background:#fafafa;padding:6px;border:1px solid var(--l)}
 td{border:1px solid var(--l);padding:2px}td input{border:0;border-radius:0}
@@ -44,18 +45,22 @@ const D=s=>String(s??'').replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)
 const ES=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // [key, English, Arabic, required, type]
 const CUST=[['name','Customer Name','اسم العميل',1],['head','Head office','المكتب الرئيسي'],['addr','National Address','العنوان الوطني (مثال: RRRD2929)',1],['tel','Tel','هاتف'],['cr','Commercial Registration','السجل التجاري',1],['mobile','Mobile','جوال',1],['vat','VAT No.','الرقم الضريبي',1],['email','E-Mail','بريد إلكتروني',1]];
-const INT1=[['code','Customer Code','كود العميل',1],['region','Region','المنطقة'],['sales','Salesman Responsible','المندوب المسئول',1],['scode','Salesman Code','الرقم الوظيفي']];
+const INT1=[['code','Customer Code','كود العميل',1]];
+const SALES=[['region','Region','المنطقة'],['sales','Salesman Responsible','المندوب المسئول',1],['scode','Salesman Code','كود المندوب']];
+const ALLC=[...CUST,...SALES];
+const RATE=[['rating','Salesman Rating of Customer','تقييم المندوب للعميل',0,'select']];
 const INT2=[['limit','Credit Limit','الحد الائتماني',0,'number'],['terms','Credit Terms','شروط الدفع'],['rebate','Rebate %','نسبة الخصم على المبيعات',0,'number'],['lfee','Listing Fees','رسم إدراج صنف',0,'number'],['ofee','Opening Fees','رسم افتتاح فرع',0,'number']];
-const APPR=[['sm','Salesman','مندوب المبيعات'],['smd','Date','التاريخ',0,'date'],['am','Area Sales Manager','مدير مبيعات المنطقة'],['amd','Date','التاريخ',0,'date']];
+const RATING=[['5','5 — ممتاز · Excellent'],['4','4 — جيد جداً · Very good'],['3','3 — جيد · Good'],['2','2 — مقبول · Fair'],['1','1 — ضعيف · Poor']];
 const CONT=[['n','Contact Person','الاسم'],['t','Job Title','الوظيفة'],['tel','Tel.','هاتف'],['ex','Ex.','تحويلة'],['mob','Mobile','جوال'],['em','E-Mail','البريد']];
 const BR=[['n','Branch Name','اسم الفرع'],['city','City','المدينة'],['area','Area','الحي']];
 const COLS={contacts:CONT,branches:BR};
-const FILES=[['cr','Commercial Registration Certificate','شهادة السجل التجاري',1],['vat','VAT Registration Certificate','شهادة التسجيل في ضريبة القيمة المضافة',1],['na','National Address','العنوان الوطني',1],['br','List of Branches','قائمة الأفرع']];
+const FILES=[['cr','Commercial Registration Certificate','شهادة السجل التجاري',1],['vat','VAT Registration Certificate','شهادة ضريبة القيمة المضافة',1],['na','National Address','شهدة إثبات العنوان الوطني',1],['br','List of Branches','قائمة الأفرع']];
 const RULES={cr:[/^\d{10}$/,'السجل التجاري 10 أرقام'],vat:[/^3\d{13}3$/,'الرقم الضريبي 15 رقماً يبدأ وينتهي بالرقم 3'],mobile:[/^(\+?966|0)?5\d{8}$/,'رقم جوال سعودي مثل 05xxxxxxxx'],email:[/^[^\s@]+@[^\s@]+\.[^\s@]+$/,'بريد إلكتروني غير صحيح'],addr:[/^.{8,}$/,'العنوان الوطني 8 خانات على الأقل']};
 const CLEAN=['cr','vat','mobile','tel'];
 let CODE,LIST=[];const app=$('#app');
 
-const field=(f,v='')=>`<label class=f><span><b>${f[2]}</b>${f[3]?' <em>*</em>':''} <i>${f[1]}</i></span><input name=${f[0]} type=${f[4]||'text'} value="${ES(v)}"></label>`;
+const ctl=(f,v)=>f[4]==='select'?`<select name=${f[0]}><option value="">— اختر —</option>${RATING.map(([k,t])=>`<option value=${k}${String(v)===k?' selected':''}>${t}</option>`).join('')}</select>`:`<input name=${f[0]} type=${f[4]||'text'} value="${ES(v)}">`;
+const field=(f,v='')=>`<label class=f><span><b>${f[2]}</b>${f[3]?' <em>*</em>':''} <i>${f[1]}</i></span>${ctl(f,v)}</label>`;
 const row=(cols,r={})=>`<tr>${cols.map(c=>`<td><input data-k=${c[0]} value="${ES(r[c[0]])}"></td>`).join('')}<td><button type=button class=x data-del>×</button></td></tr>`;
 const tbl=(id,cols,rows)=>`<div class=tw><table data-t=${id}><thead><tr>${cols.map(c=>`<th>${c[2]}<br>${c[1]}</th>`).join('')}<th></th></tr></thead><tbody>${rows.map(r=>row(cols,r)).join('')}</tbody></table></div><button type=button class=ghost data-add=${id}>+ إضافة صف</button>`;
 
@@ -86,8 +91,8 @@ function xlsx(d,int){
   const wb=XLSX.utils.book_new(),kv=(L,o)=>L.map(f=>[f[1]+' · '+f[2],o[f[0]]??'']),
   tb=(cols,rows)=>[cols.map(c=>c[1]+' · '+c[2]),...(rows||[]).map(r=>cols.map(c=>r[c[0]]??''))],
   add=(rows,n,w)=>{const s=XLSX.utils.aoa_to_sheet(rows);s['!cols']=w.map(x=>({wch:x}));XLSX.utils.book_append_sheet(wb,s,n)};
-  add([['Customer Data Update Form · نموذج تحديث بيانات عميل'],[],...kv(CUST,d),[],...tb(CONT,d.contacts)],'Customer',[42,28,22,14,20,28]);
-  if(int)add([['Internal Form · نموذج داخلي - إدارة المبيعات'],[],['Reference · المرجع',d.id||''],['Customer Name · اسم العميل',d.name],...kv(INT1,d),...kv(INT2,d),[],...tb(BR,d.branches),[],...[[APPR[0],APPR[1]],[APPR[2],APPR[3]]].map(p=>p.flatMap(f=>[f[1]+' · '+f[2],d[f[0]]??'']))],'Internal',[42,28,22,20]);
+  add([['Customer Data Update Form · نموذج تحديث بيانات عميل'],[],...kv(ALLC,d),[],...tb(CONT,d.contacts),[],...tb(BR,d.branches)],'Customer',[42,28,22,14,20,28]);
+  if(int)add([['Internal Form · نموذج داخلي - إدارة المبيعات'],[],['Reference · المرجع',d.id||''],['Customer Name · اسم العميل',d.name],...kv(INT1,d),...kv(INT2,d),...kv(RATE,d)],'Internal',[42,28]);
   wb.Workbook={Views:[{RTL:true}]};
   return wb;
 }
@@ -98,7 +103,9 @@ function cust(){
   const d=JSON.parse(localStorage.getItem('idtc_draft')||'{}');
   app.innerHTML=`<form id=f novalidate>
   <section><h2>المعلومات الأساسية · Basic Information</h2><div class=g>${CUST.map(x=>field(x,d[x[0]])).join('')}</div></section>
+  <section><h2>بيانات المندوب · Salesman Info</h2><div class=g>${SALES.map(x=>field(x,d[x[0]])).join('')}</div></section>
   <section><h2>تفاصيل الاتصال · Contact details</h2>${tbl('contacts',CONT,d.contacts?.length?d.contacts:[{},{},{}])}</section>
+  <section><h2>معلومات الفروع · Branches Info</h2>${tbl('branches',BR,d.branches?.length?d.branches:[{},{},{}])}</section>
   <section><h2>المرفقات · Attachments</h2><div class=g>${FILES.map(([k,en,ar,r])=>`<label class=f><span><b>${ar}</b>${r?' <em>*</em>':''} <i>${en}</i></span><input type=file name=file_${k} accept=".pdf,image/*"></label>`).join('')}</div></section>
   <div id=msg></div><button class=pri>إرسال البيانات · Submit</button></form>`;
   const f=$('#f');
@@ -106,7 +113,7 @@ function cust(){
   f.onsubmit=async e=>{
     e.preventDefault();
     const o=collect(f),m=$('#msg'),fs=FILES.map(([k,,,r])=>[k,f['file_'+k].files[0],r]);
-    const ok=validate(o,CUST),miss=fs.some(([,x,r])=>r&&!x),big=fs.some(([,x])=>x&&x.size>4e6);
+    const ok=validate(o,ALLC),miss=fs.some(([,x,r])=>r&&!x),big=fs.some(([,x])=>x&&x.size>4e6);
     if(!ok||!o.contacts.length||miss||big)return say(m,'bad',!ok?'يرجى تصحيح الحقول المشار إليها':!o.contacts.length?'أضف جهة اتصال واحدة على الأقل':miss?'يرجى إرفاق المستندات المطلوبة (*)':'حجم الملف الواحد يجب ألا يتجاوز 4MB');
     say(m,'','جارٍ الإرسال…');$('.pri').disabled=true;
     o.files=await Promise.all(fs.filter(x=>x[1]).map(async([k,x])=>({k,n:x.name,type:x.type||'application/octet-stream',b64:await b64(x)})));
@@ -145,16 +152,14 @@ function rec(id){
   const r=LIST.find(x=>x.id===id),nz=a=>a?.length?a:[{}];
   app.innerHTML=`<div class="bar no"><button class=ghost id=bk>← القائمة</button><button class=ghost id=xl>تنزيل Excel</button><button class=ghost id=pr>طباعة / PDF</button></div>
   <form id=f novalidate><p>المرجع: <b dir=ltr>${ES(id)}</b> — ${ES(r.date)}</p>
-  <section><h2>بيانات العميل · Customer</h2><div class=g>${CUST.map(x=>field(x,r[x[0]])).join('')}</div>${tbl('contacts',CONT,nz(r.contacts))}<p class=no>${(r.files||[]).map(x=>`<a target=_blank href="${ES(x.url)}">📎 ${ES(x.n)}</a>`).join(' · ')}</p></section>
-  <section><h2>البيانات الداخلية · Internal</h2><div class=g>${[...INT1,...INT2].map(x=>field(x,r[x[0]])).join('')}</div></section>
-  <section><h2>الفروع · Branches</h2>${tbl('branches',BR,nz(r.branches))}</section>
-  <section><h2>الاعتماد · Approval</h2><div class=g>${APPR.map(x=>field(x,r[x[0]])).join('')}</div></section>
+  <section><h2>بيانات العميل · Customer</h2><div class=g>${ALLC.map(x=>field(x,r[x[0]])).join('')}</div><h3 class=sub>جهات الاتصال · Contacts</h3>${tbl('contacts',CONT,nz(r.contacts))}<h3 class=sub>معلومات الفروع · Branches Info</h3>${tbl('branches',BR,nz(r.branches))}<p class=no>${(r.files||[]).map(x=>`<a target=_blank href="${ES(x.url)}">📎 ${ES(x.n)}</a>`).join(' · ')}</p></section>
+  <section><h2>البيانات الداخلية · Internal</h2><div class=g>${[...INT1,...INT2,...RATE].map(x=>field(x,r[x[0]])).join('')}</div></section>
   <div id=msg class=no></div><button class="pri no">حفظ واعتماد</button></form>`;
   const f=$('#f');
   $('#bk').onclick=list;$('#pr').onclick=()=>print();$('#xl').onclick=()=>XLSX.writeFile(xlsx({...r,...collect(f)},1),id+'.xlsx');
   f.onsubmit=async e=>{
     e.preventDefault();const o={...r,...collect(f)},m=$('#msg');
-    if(!validate(o,[...CUST,...INT1]))return say(m,'bad','يرجى تصحيح الحقول المشار إليها');
+    if(!validate(o,[...ALLC,...INT1]))return say(m,'bad','يرجى تصحيح الحقول المشار إليها');
     say(m,'','جارٍ الحفظ…');
     try{const x=await api({a:'internal',code:CODE,id,d:o,xlsx:toB64(xlsx(o,1))});if(!x.ok)throw x.err;Object.assign(r,o,{status:'Completed'});say(m,'ok','تم الحفظ ✔')}
     catch(err){say(m,'bad','تعذّر الحفظ: '+err)}
