@@ -60,7 +60,7 @@ const CREQ=['n','t','tel','mob','em'],FMT={mob:'mobile',em:'email'};
 const RV=r=>r[0]+' · '+r[1];
 const fixedRows=l=>ROLES.map(r=>({...((l||[]).find(c=>c.role===RV(r))||{}),role:RV(r)}));
 const COLS={contacts:CONT,branches:BR};
-const FILES=[['cr','Commercial Registration Certificate','شهادة السجل التجاري',1],['vat','VAT Registration Certificate','شهادة ضريبة القيمة المضافة',1],['na','National Address','العنوان الوطني',1],['br','List of Branches','قائمة الأفرع']];
+const FILES=[['cr','Commercial Registration Certificate','شهادة السجل التجاري',1],['vat','VAT Registration Certificate','شهادة ضريبة القيمة المضافة',1],['na','National Address','شهادة إثبات العنوان الوطني',1],['br','List of Branches','قائمة الأفرع']];
 const RULES={cr:[/^\d{10}$/,'السجل التجاري 10 أرقام'],vat:[/^3\d{13}3$/,'الرقم الضريبي 15 رقماً يبدأ وينتهي بالرقم 3'],mobile:[/^(\+?966|0)?5\d{8}$/,'رقم جوال سعودي مثل 05xxxxxxxx'],email:[/^[^\s@]+@[^\s@]+\.[^\s@]+$/,'بريد إلكتروني غير صحيح'],addr:[/^.{8,}$/,'العنوان الوطني 8 خانات على الأقل']};
 const CLEAN=['cr','vat','mobile','tel'];
 let CODE,LIST=[];const app=$('#app');
