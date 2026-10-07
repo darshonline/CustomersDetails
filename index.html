@@ -47,9 +47,9 @@ const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelecto
 const D=s=>String(s??'').replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)).trim();
 const ES=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // [key, English, Arabic, required, type]
-const CUST=[['name','Customer Name','اسم العميل',1],['head','Head Office','المكتب الرئيسي',0,'select'],['tel','Tel','هاتف'],['cr','Commercial Registration','السجل التجاري',1],['crexp','CR Expiry Date','تاريخ انتهاء السجل التجاري',1,'date'],['left','CR Remaining Validity','المتبقي في السجل التجاري',0,'ro'],['vat','VAT No.','الرقم الضريبي',1],['addr','National Address','العنوان الوطني (مثال: RRRD2929)',1],['email','E-Mail','بريد إلكتروني',1]];
+const CUST=[['name','Customer Name','اسم العميل',1],['head','Head Office','المكتب الرئيسي',0,'select'],['tel','Tel','هاتف'],['cr','Commercial Registration','السجل التجاري',1],['crexp','CR Expiry Date','تاريخ انتهاء السجل التجاري',1,'date'],['left','CR Remaining Validity','صلاحية السجل التجاري',0,'ro'],['vat','VAT No.','الرقم الضريبي',1],['addr','National Address','العنوان الوطني',1],['email','E-Mail','بريد إلكتروني',1]];
 const INT1=[['code','Customer Code','كود العميل',1]];
-const SALES=[['region','Region','المنطقة'],['sales','Salesman Responsible','المندوب المسئول',1],['scode','Salesman Code / Employee No.','كود المندوب / الرقم الوظيفي']];
+const SALES=[['region','Region','المنطقة'],['sales','Salesman Responsible','المندوب المسئول',1],['scode','Salesman Code / Employee No.','كود المندوب']];
 const ALLC=[...CUST,...SALES];
 const RATE=[['rating','Salesman Rating of Customer','تقييم المندوب للعميل',0,'select']];
 const INT2=[['limit','Credit Limit','الحد الائتماني',0,'number'],['terms','Credit Terms','شروط الدفع'],['rebate','Rebate %','نسبة الخصم على المبيعات',0,'number'],['lfee','Listing Fees','رسم إدراج صنف',0,'number'],['ofee','Opening Fees','رسم افتتاح فرع',0,'number']];
@@ -62,7 +62,7 @@ const CREQ=['n','t','mob','em'],FMT={mob:'mobile',em:'email'};
 const RV=r=>r[0]+' · '+r[1];
 const fixedRows=l=>ROLES.map(r=>({...((l||[]).find(c=>c.role===RV(r))||{}),role:RV(r)}));
 const COLS={contacts:CONT,branches:BR};
-const FILES=[['cr','Commercial Registration Certificate','شهادة السجل التجاري',1],['vat','VAT Registration Certificate','شهادة التسجيل في ضريبة القيمة المضافة',1],['na','National Address','العنوان الوطني',1],['br','List of Branches','قائمة الأفرع'],['mun','Municipality License','رخصة البلدية',1],['wid','Warehouse Officer ID','هوية مسئول المستودع',1],['pid','Purchasing Officer ID','هوية مسئول المشتريات',1]];
+const FILES=[['cr','Commercial Registration Certificate','شهادة السجل التجاري',1],['vat','VAT Registration Certificate','شهادة التسجيل في ضريبة القيمة المضافة',1],['na','National Address','شهادة إثبات العنوان الوطني',1],['br','List of Branches','قائمة الأفرع'],['mun','Municipality License','رخصة البلدية',1],['wid','Warehouse Officer ID','هوية مسئول المستودع',1],['pid','Purchasing Officer ID','هوية مسئول المشتريات',1]];
 const RULES={cr:[/^\d{10}$/,'السجل التجاري 10 أرقام'],vat:[/^3\d{13}3$/,'الرقم الضريبي 15 رقماً يبدأ وينتهي بالرقم 3'],mobile:[/^(\+?966|0)?5\d{8}$/,'رقم جوال سعودي مثل 05xxxxxxxx'],email:[/^[^\s@]+@[^\s@]+\.[^\s@]+$/,'بريد إلكتروني غير صحيح'],addr:[/^.{8,}$/,'العنوان الوطني 8 خانات على الأقل'],crexp:[{test:v=>daysLeft(v)>=0},'السجل التجاري منتهي الصلاحية (أو التاريخ غير صحيح) — لا يمكن قبول النموذج']};
 const CLEAN=['cr','vat','mobile','tel'];
 let CODE,LIST=[];const app=$('#app');
