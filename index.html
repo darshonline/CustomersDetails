@@ -47,7 +47,7 @@ const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelecto
 const D=s=>String(s??'').replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)).trim();
 const ES=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // [key, English, Arabic, required, type]
-const CUST=[['name','Customer Name','اسم العميل',1],['head','Head Office','المكتب الرئيسي',0,'select'],['tel','Tel','هاتف'],['mobile','Mobile','جوال',1],['cr','Commercial Registration','السجل التجاري',1],['crexp','CR Expiry Date','تاريخ انتهاء السجل التجاري',1,'date'],['left','CR Remaining Validity','المتبقي في السجل التجاري',0,'ro'],['vat','VAT No.','الرقم الضريبي',1],['addr','National Address','العنوان الوطني (مثال: RRRD2929)',1],['email','E-Mail','بريد إلكتروني',1]];
+const CUST=[['name','Customer Name','اسم العميل',1],['head','Head Office','المكتب الرئيسي',0,'select'],['tel','Tel','هاتف'],['cr','Commercial Registration','السجل التجاري',1],['crexp','CR Expiry Date','تاريخ انتهاء السجل التجاري',1,'date'],['left','CR Remaining Validity','المتبقي في السجل التجاري',0,'ro'],['vat','VAT No.','الرقم الضريبي',1],['addr','National Address','العنوان الوطني (مثال: RRRD2929)',1],['email','E-Mail','بريد إلكتروني',1]];
 const INT1=[['code','Customer Code','كود العميل',1]];
 const SALES=[['region','Region','المنطقة'],['sales','Salesman Responsible','المندوب المسئول',1],['scode','Salesman Code / Employee No.','كود المندوب / الرقم الوظيفي']];
 const ALLC=[...CUST,...SALES];
