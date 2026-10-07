@@ -24,6 +24,7 @@ input:focus,select:focus{outline:2px solid var(--r);border-color:transparent}
 .sub{font-size:13px;margin:14px 0 6px;color:var(--m)}
 .rl{min-width:150px;padding:6px;background:#fafafa;font-size:13px}.rl small{color:var(--m)}
 .inv{outline:2px solid var(--r);outline-offset:-2px;background:#fff6f6}
+.ro{background:#f0f0f2;font-weight:700;cursor:not-allowed}.ro.neg{color:var(--r)}
 .tw{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:820px}
 th{font-size:12px;background:#fafafa;padding:6px;border:1px solid var(--l)}
 td{border:1px solid var(--l);padding:2px}td input{border:0;border-radius:0}
@@ -46,29 +47,30 @@ const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelecto
 const D=s=>String(s??'').replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)).trim();
 const ES=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // [key, English, Arabic, required, type]
-const CUST=[['name','Customer Name','اسم العميل',1],['head','Head office','المكتب الرئيسي'],['addr','National Address','العنوان الوطني',1],['tel','Tel','هاتف'],['cr','Commercial Registration','السجل التجاري',1],['mobile','Mobile','جوال',1],['vat','VAT No.','الرقم الضريبي',1],['email','E-Mail','بريد إلكتروني',1]];
+const CUST=[['name','Customer Name','اسم العميل',1],['head','Head Office','المكتب الرئيسي',0,'select'],['tel','Tel','هاتف'],['mobile','Mobile','جوال',1],['cr','Commercial Registration','السجل التجاري',1],['crexp','CR Expiry Date','تاريخ انتهاء السجل التجاري',1,'date'],['left','CR Remaining Validity','المتبقي في السجل التجاري',0,'ro'],['vat','VAT No.','الرقم الضريبي',1],['addr','National Address','العنوان الوطني (مثال: RRRD2929)',1],['email','E-Mail','بريد إلكتروني',1]];
 const INT1=[['code','Customer Code','كود العميل',1]];
-const SALES=[['region','Region','المنطقة'],['sales','Salesman Responsible','المندوب المسئول',1],['scode','Salesman Code / Employee No.','كود المندوب']];
+const SALES=[['region','Region','المنطقة'],['sales','Salesman Responsible','المندوب المسئول',1],['scode','Salesman Code / Employee No.','كود المندوب / الرقم الوظيفي']];
 const ALLC=[...CUST,...SALES];
 const RATE=[['rating','Salesman Rating of Customer','تقييم المندوب للعميل',0,'select']];
 const INT2=[['limit','Credit Limit','الحد الائتماني',0,'number'],['terms','Credit Terms','شروط الدفع'],['rebate','Rebate %','نسبة الخصم على المبيعات',0,'number'],['lfee','Listing Fees','رسم إدراج صنف',0,'number'],['ofee','Opening Fees','رسم افتتاح فرع',0,'number']];
 const RATING=[['5','5 — ممتاز · Excellent'],['4','4 — جيد جداً · Very good'],['3','3 — جيد · Good'],['2','2 — مقبول · Fair'],['1','1 — ضعيف · Poor']];
-const CONT=[['role','Required Position','المسمى الوظيفي'],['n','Contact Person','الاسم'],['t','Job Title','الوظيفة'],['tel','Tel.','هاتف'],['ex','Ex.','تحويلة'],['mob','Mobile','جوال'],['em','E-Mail','البريد']];
-const BR=[['n','Branch Name','اسم الفرع'],['city','City','المدينة'],['area','Area','الحي'],['mgr','Branch Manager','مدير الفرع'],['mob','Mobile','جوال'],['em','E-Mail','بريد']];
-const ROLES=[['إدارة المشتريات','Purchasing Management'],['إدارة المستودعات','Warehouse Management'],['الإدارة المالية','Finance Management']];
-const CREQ=['n','t','tel','mob','em'],FMT={mob:'mobile',em:'email'};
+const OPTS={rating:RATING,head:[['Riyadh','الرياض · Riyadh'],['Jeddah','جدة · Jeddah'],['Dammam','الدمام · Dammam'],['Other','أخرى · Other']]};
+const CONT=[['role','Required Position','المسمى الوظيفي المطلوب'],['n','Contact Person','الاسم'],['t','Job Title','الوظيفة'],['tel','Tel.','هاتف'],['ex','Ex.','تحويلة'],['mob','Mobile','جوال'],['em','E-Mail','البريد']];
+const BR=[['n','Branch Name','اسم الفرع'],['region','Region','المنطقة'],['city','City','المدينة'],['area','Area','الحي'],['mgr','Branch Manager','مدير الفرع'],['mob','Mobile','جوال'],['em','E-Mail','بريد']];
+const ROLES=[['المدير العام','General Manager'],['إدارة المشتريات','Purchasing Management'],['إدارة المستودعات','Warehouse Management'],['الإدارة المالية','Finance Management']];
+const CREQ=['n','t','mob','em'],FMT={mob:'mobile',em:'email'};
 const RV=r=>r[0]+' · '+r[1];
 const fixedRows=l=>ROLES.map(r=>({...((l||[]).find(c=>c.role===RV(r))||{}),role:RV(r)}));
 const COLS={contacts:CONT,branches:BR};
-const FILES=[['cr','Commercial Registration Certificate','شهادة السجل التجاري',1],['vat','VAT Registration Certificate','شهادة ضريبة القيمة المضافة',1],['na','National Address','شهادة إثبات العنوان الوطني',1],['br','List of Branches','قائمة الأفرع']];
-const RULES={cr:[/^\d{10}$/,'السجل التجاري 10 أرقام'],vat:[/^3\d{13}3$/,'الرقم الضريبي 15 رقماً يبدأ وينتهي بالرقم 3'],mobile:[/^(\+?966|0)?5\d{8}$/,'رقم جوال سعودي مثل 05xxxxxxxx'],email:[/^[^\s@]+@[^\s@]+\.[^\s@]+$/,'بريد إلكتروني غير صحيح'],addr:[/^.{8,}$/,'العنوان الوطني 8 خانات على الأقل']};
+const FILES=[['cr','Commercial Registration Certificate','شهادة السجل التجاري',1],['vat','VAT Registration Certificate','شهادة التسجيل في ضريبة القيمة المضافة',1],['na','National Address','العنوان الوطني',1],['br','List of Branches','قائمة الأفرع'],['mun','Municipality License','رخصة البلدية',1],['wid','Warehouse Officer ID','هوية مسئول المستودع',1],['pid','Purchasing Officer ID','هوية مسئول المشتريات',1]];
+const RULES={cr:[/^\d{10}$/,'السجل التجاري 10 أرقام'],vat:[/^3\d{13}3$/,'الرقم الضريبي 15 رقماً يبدأ وينتهي بالرقم 3'],mobile:[/^(\+?966|0)?5\d{8}$/,'رقم جوال سعودي مثل 05xxxxxxxx'],email:[/^[^\s@]+@[^\s@]+\.[^\s@]+$/,'بريد إلكتروني غير صحيح'],addr:[/^.{8,}$/,'العنوان الوطني 8 خانات على الأقل'],crexp:[{test:v=>daysLeft(v)>=0},'السجل التجاري منتهي الصلاحية (أو التاريخ غير صحيح) — لا يمكن قبول النموذج']};
 const CLEAN=['cr','vat','mobile','tel'];
 let CODE,LIST=[];const app=$('#app');
 
-const ctl=(f,v)=>f[4]==='select'?`<select name=${f[0]}><option value="">— اختر —</option>${RATING.map(([k,t])=>`<option value=${k}${String(v)===k?' selected':''}>${t}</option>`).join('')}</select>`:`<input name=${f[0]} type=${f[4]||'text'} value="${ES(v)}">`;
+const ctl=(f,v)=>f[4]==='select'?`<select name=${f[0]}><option value="">— اختر —</option>${(OPTS[f[0]]||[]).map(([k,t])=>`<option value=${k}${String(v)===k?' selected':''}>${t}</option>`).join('')}</select>`:f[4]==='ro'?`<input name=${f[0]} class=ro readonly tabindex=-1 value="${ES(v)}">`:`<input name=${f[0]} type=${f[4]||'text'} value="${ES(v)}">`;
 const field=(f,v='')=>`<label class=f><span><b>${f[2]}</b>${f[3]?' <em>*</em>':''} <i>${f[1]}</i></span>${ctl(f,v)}</label>`;
 const cell=(c,r)=>c[0]==='role'?`<td class=rl><b>${ES(String(r.role||'').split(' · ')[0])}</b><br><small>${ES(String(r.role||'').split(' · ')[1]||'')}</small><input type=hidden data-k=role value="${ES(r.role)}"></td>`:`<td><input data-k=${c[0]} value="${ES(r[c[0]])}"></td>`;
-const row=(cols,r={},fx)=>`<tr>${cols.map(c=>cell(c,r)).join('')}${fx?'':'<td><button type=button class=x data-del>×</button></td>'}</tr>`;
+const row=(cols,r={},fx)=>`<tr>${cols.map(c=>cell(c,r)).join('')}${fx?'':'<td><button type=button class=x data-del title="إزالة الفرع" aria-label="إزالة الفرع">✕</button></td>'}</tr>`;
 const tbl=(id,cols,rows,fx)=>`<div class=tw><table data-t=${id}><thead><tr>${cols.map(c=>`<th>${c[2]}${fx&&CREQ.includes(c[0])?' <em>*</em>':''}<br>${c[1]}</th>`).join('')}${fx?'':'<th></th>'}</tr></thead><tbody>${rows.map(r=>row(cols,r,fx)).join('')}</tbody></table></div>${fx?'':`<button type=button class=ghost data-add=${id}>+ إضافة صف</button>`}`;
 
 function collect(root){
@@ -84,6 +86,13 @@ function validate(o,list){
     if(m){ok=false;$(`[name=${k}]`).closest('label').insertAdjacentHTML('beforeend',`<small class=err>${m}</small>`)}
   });
   return ok;
+}
+const daysLeft=v=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(v||''))return NaN;const t=new Date();t.setHours(0,0,0,0);return Math.round((new Date(v+'T00:00:00')-t)/864e5)};
+function syncLeft(){
+  const i=$('[name=crexp]'),o=$('[name=left]');if(!i||!o)return;
+  const n=daysLeft(i.value);
+  o.value=isNaN(n)?'':n<0?`منتهي (منذ ${-n} يوم)`:n===0?'ينتهي اليوم':`${n} يوم (≈ ${Math.floor(n/30)} شهر)`;
+  o.classList.toggle('neg',n<0);
 }
 function vTables(root){
   let ok=true;
@@ -123,17 +132,18 @@ function cust(){
   app.innerHTML=`<form id=f novalidate>
   <section><h2>المعلومات الأساسية · Basic Information</h2><div class=g>${CUST.map(x=>field(x,d[x[0]])).join('')}</div></section>
   <section><h2>بيانات المندوب · Salesman Info</h2><div class=g>${SALES.map(x=>field(x,d[x[0]])).join('')}</div></section>
-  <section><h2>تفاصيل الاتصال · Contact details</h2><p class=sub>يرجى تسجيل بيانات المسؤول عن كل إدارة — جميع الحقول مطلوبة عدا التحويلة</p>${tbl('contacts',CONT,fixedRows(d.contacts),1)}</section>
+  <section><h2>تفاصيل الاتصال · Contact details</h2><p class=sub>يرجى تسجيل بيانات المسؤول عن كل إدارة — جميع الحقول مطلوبة عدا الهاتف والتحويلة</p>${tbl('contacts',CONT,fixedRows(d.contacts),1)}</section>
   <section><h2>معلومات الفروع · Branches Info</h2>${tbl('branches',BR,d.branches?.length?d.branches:[{},{},{}])}</section>
   <section><h2>المرفقات · Attachments</h2><div class=g>${FILES.map(([k,en,ar,r])=>`<label class=f><span><b>${ar}</b>${r?' <em>*</em>':''} <i>${en}</i></span><input type=file name=file_${k} accept=".pdf,image/*"></label>`).join('')}</div></section>
   <div id=msg></div><button class=pri>إرسال البيانات · Submit</button></form>`;
   const f=$('#f');
   f.oninput=()=>localStorage.setItem('idtc_draft',JSON.stringify(collect(f)));
+  syncLeft();
   f.onsubmit=async e=>{
     e.preventDefault();
     const o=collect(f),m=$('#msg'),fs=FILES.map(([k,,,r])=>[k,f['file_'+k].files[0],r]);
-    const ok=validate(o,ALLC),cok=vTables(f),miss=fs.some(([,x,r])=>r&&!x),big=fs.some(([,x])=>x&&x.size>4e6);
-    if(!ok||!cok||miss||big)return say(m,'bad',!ok?'يرجى تصحيح الحقول المشار إليها':!cok?'يرجى استكمال بيانات جهات الاتصال الثلاث (جميع الحقول مطلوبة عدا التحويلة) وتصحيح الحقول المظللة':miss?'يرجى إرفاق المستندات المطلوبة (*)':'حجم الملف الواحد يجب ألا يتجاوز 4MB');
+    const ok=validate(o,ALLC),cok=vTables(f),miss=fs.some(([,x,r])=>r&&!x),big=fs.some(([,x])=>x&&x.size>4e6)||fs.reduce((a,[,x])=>a+(x?x.size:0),0)>2e7;
+    if(!ok||!cok||miss||big)return say(m,'bad',!ok?'يرجى تصحيح الحقول المشار إليها':!cok?'يرجى استكمال بيانات جهات الاتصال الأربع (جميع الحقول مطلوبة عدا الهاتف والتحويلة) وتصحيح الحقول المظللة':miss?'يرجى إرفاق المستندات المطلوبة (*)':'حجم الملف الواحد يجب ألا يتجاوز 4MB وإجمالي المرفقات 20MB');
     say(m,'','جارٍ الإرسال…');$('.pri').disabled=true;
     o.files=await Promise.all(fs.filter(x=>x[1]).map(async([k,x])=>({k,n:x.name,type:x.type||'application/octet-stream',b64:await b64(x)})));
     const wb=xlsx(o,0);
@@ -175,7 +185,7 @@ function rec(id){
   <section><h2>البيانات الداخلية · Internal</h2><div class=g>${[...INT1,...INT2,...RATE].map(x=>field(x,r[x[0]])).join('')}</div></section>
   <div id=msg class=no></div><button class="pri no">حفظ واعتماد</button></form>`;
   const f=$('#f');
-  $('#bk').onclick=list;$('#pr').onclick=()=>print();$('#xl').onclick=()=>XLSX.writeFile(xlsx({...r,...collect(f)},1),id+'.xlsx');
+  syncLeft();$('#bk').onclick=list;$('#pr').onclick=()=>print();$('#xl').onclick=()=>XLSX.writeFile(xlsx({...r,...collect(f)},1),id+'.xlsx');
   f.onsubmit=async e=>{
     e.preventDefault();const o={...r,...collect(f)},m=$('#msg');
     if(![validate(o,[...ALLC,...INT1]),vTables(f)].every(Boolean))return say(m,'bad','يرجى تصحيح الحقول المشار إليها');
@@ -186,11 +196,13 @@ function rec(id){
 }
 
 app.addEventListener('click',e=>{
-  const t=e.target;
+  const t=e.target.closest('button');if(!t)return;
   if(t.dataset.add)$(`table[data-t=${t.dataset.add}] tbody`).insertAdjacentHTML('beforeend',row(COLS[t.dataset.add]));
-  if(t.dataset.del){const tb=t.closest('tbody');tb.rows.length>1?t.closest('tr').remove():$$('input',tb).forEach(i=>i.value='')}
+  if(t.hasAttribute('data-del')){const tb=t.closest('tbody'),fm=t.closest('form');tb.rows.length>1?t.closest('tr').remove():$$('input',tb).forEach(i=>{i.value='';i.classList.remove('inv')});fm&&fm.dispatchEvent(new Event('input',{bubbles:true}))}
   if(t.dataset.o)rec(t.dataset.o);
 });
+app.addEventListener('input',e=>e.target.name==='crexp'&&syncLeft());
+app.addEventListener('change',e=>e.target.name==='crexp'&&syncLeft());
 const route=()=>location.hash==='#admin'?admin():cust();
 onhashchange=route;route();
 </script>
